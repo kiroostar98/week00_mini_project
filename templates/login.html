@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <title>로그인 페이지</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+      crossorigin="anonymous"
+    />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <!-- 쿠키태그 -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"
+      integrity="sha512-3j3VU6WC5rPQB4Ld1jnLV7Kd5xr+cq9avvhwqzbH/taCRNURoeEpoPBK9pDyeukwSxwRPJ8fDgvYXd6SkaZ2TA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <style>
+      .container {
+        display: block;
+        margin: 100px auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      img,
+      h4 {
+        margin-bottom: 20px;
+      }
+    </style>
+    <script>
+      function a() {
+        var date = new Date();
+        date.setTime(date.getTime() + 1 * 1000);
+        $.cookie('name', 'value', { path: '/' });
+        // alert(document.cookie);
+      }
+      function b() {
+        $.removeCookie('name', { path: '/' });
+      }
+      function login() {
+        let user_id = $('#sign-id').val();
+        let user_pw = $('#sign-pw').val();
+        console.log(user_id);
+        if (user_id == '') {
+          alert('아이디를 입력하세요!');
+        } else if (user_pw == '') {
+          alert('비밀번호를 입력하세요!');
+        } else {
+          $.ajax({
+            type: 'POST',
+            url: '/api/login',
+            data: {
+              id_give: user_id,
+              pw_give: user_pw,
+            },
+            success: function (response) {
+              if (response['result'] == 'success') {
+                $.cookie('mytoken', response['token'], { path: '/' });
+                alert('로그인 완료!');
+                window.location.replace('/main');
+              } else {
+                alert(response['msg']);
+              }
+            },
+          });
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <a onclick="window.location.href='/'"
+        ><img style="width: 200px" src="..\static\jungle_Logo.png" />
+      </a>
+
+      <h4>
+        <strong
+          ><strong style="color: #cd0404">맛집</strong> 탐방 크루 모집
+        </strong>
+      </h4>
+
+      <div>
+        <div style="width: 310px">
+          <!-- 이름-->
+          <div class="mb-3">
+            <input id="sign-id" class="form-control" placeholder="이름" />
+          </div>
+
+          <!-- 비밀번호 -->
+          <div class="mb-3">
+            <input
+              id="sign-pw"
+              class="form-control"
+              placeholder="비밀번호"
+              type="password"
+            />
+          </div>
+
+          <!-- 회원가입: 회원가입 버튼 클릭 시 회원가입 페이지로 이동 -->
+          <div class="mb-3">
+            <button
+              style="width: 310px"
+              class="btn btn-outline-success btn"
+              onclick="window.location.href='/sign_up'"
+              type="submit"
+              id="sign_up"
+            >
+              회원가입
+            </button>
+          </div>
+
+          <!-- 로그인: DB에 있는 ID와 PW가 일치하면 메인페이지로 이동 -->
+          <div class="mb-3">
+            <button
+              style="width: 310px"
+              class="btn btn-outline-success btn"
+              id="login"
+              type="submit"
+              onclick="login()"
+              id="login"
+            >
+              로그인
+            </button>
+
+            <!-- <button onclick="a()">쿠키생성</button>
+            <button onclick="b()">쿠키삭제</button> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <title>로그인 페이지</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+      crossorigin="anonymous"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+    <style>
+      .container {
+        display: block;
+        margin: 100px auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      img,
+      h4 {
+        margin-bottom: 20px;
+      }
+    </style>
+
+    <script>
+      function CreateId() {
+        let user_id_sent = $('#floatingInput').val();
+        let password_sent = $('#floatingPassword').val();
+        let user_phone_sent = $('#floatingPhone').val();
+        console.log(user_phone_sent, password_sent, user_id_sent);
+        if (user_id_sent == '') {
+          alert('이름을 입력하세요!');
+        } else if (password_sent == '') {
+          alert('비밀번호를 입력하세요!');
+        } else if (user_phone_sent == '') {
+          alert('핸드폰 번호를 입력하세요!');
+        } else {
+          $.ajax({
+            type: 'POST',
+            url: '/api/sign_up',
+            data: {
+              user_id: user_id_sent,
+              password: password_sent,
+              phoneNumber: user_phone_sent,
+            }, // 데이터를 주는 방법
+            success: function (response) {
+              if (response['result'] == 'success') {
+                alert(' 환영합니다 :)');
+                window.location.href = '/';
+              } else {
+                alert(response['msg']);
+              }
+            },
+          });
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <a onclick="window.location.href='/'"
+        ><img style="width: 200px" src="..\static\jungle_Logo.png"
+      /></a>
+
+      <h4>
+        <strong
+          ><strong style="color: #cd0404">맛집</strong> 탐방 크루 모집
+        </strong>
+      </h4>
+
+      <div>
+        <div style="width: 310px">
+          <!-- 이름-->
+          <div class="form-floating mb-3">
+            <input
+              type="email"
+              class="form-control"
+              id="floatingInput"
+              placeholder="이름"
+            />
+            <label for="floatingInput">이름</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input
+              type="password"
+              class="form-control"
+              id="floatingPassword"
+              placeholder="비밀번호"
+            />
+            <label for="floatingPassword">비밀번호</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input
+              type="phone"
+              class="form-control"
+              id="floatingPhone"
+              placeholder="전화번호"
+            />
+            <label for="floatingPhone">전화번호</label>
+          </div>
+
+          <!-- <div class="mb-3">
+            <input id="sign-id" class="form-control" placeholder="이름" />
+          </div>
+
+          
+          <div class="mb-3">
+            <input
+              id="sign-pw"
+              class="form-control"
+              placeholder="비밀번호"
+              type="password"
+            />
+          </div>
+          <div class="mb-3">
+            <input
+              id="input-phone"
+              class="form-control"
+              placeholder="010-0000-0000 형식으로 입력하세요"
+            />
+          </div> -->
+
+          <!-- 회원가입 -->
+
+          <button
+            style="width: 310px"
+            type="submit"
+            class="btn btn-outline-success btn"
+            onclick="CreateId()"
+          >
+            회원가입
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

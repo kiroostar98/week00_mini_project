@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ko">
+  
+<head>
+    <title>메인 페이지</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+      integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+      crossorigin="anonymous"
+    />
+
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <!-- 쿠키태그 -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"
+      integrity="sha512-3j3VU6WC5rPQB4Ld1jnLV7Kd5xr+cq9avvhwqzbH/taCRNURoeEpoPBK9pDyeukwSxwRPJ8fDgvYXd6SkaZ2TA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <style>
+      header {
+        background-color: #3a9d2b;
+        display: flex;
+        height: 100px;
+        justify-content: space-between;
+      }
+      .logout {
+        margin: 6px 20px;
+        display: flex;
+      }
+      .form-group {
+        margin: 10px;
+      }
+      .user-name {
+        margin: 25px 10px;
+        color: white;
+        border-radius: 9px;
+        /* font-size: large; */
+      }
+      #post-box {
+        width: 500px;
+        margin: 20px auto;
+        padding: 50px;
+        border: black solid;
+        border-radius: 5px;
+      }
+      /* .wwrap {
+        display: flex;
+        justify-content: space-between;
+      } */
+      .restaurant {
+        display: flex;
+        justify-content: space-between;
+      }
+      .address {
+        display: flex;
+        justify-content: space-between;
+      }
+      .maxnum {
+        display: flex;
+        justify-content: space-between;
+      }
+      .date {
+        display: flex;
+        justify-content: space-between;
+      }
+      .time {
+        display: flex;
+        justify-content: space-between;
+      }
+      td {
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        font-size: 20px;
+        font-family: 굴림;
+      }
+      .btn-post-box {
+        width: 1000px;
+      }
+      .logo-jungle {
+        display: flex;
+      }
+    </style>
+    <script>
+      function logout() {
+        //  api/logout으로 이동
+        window.location = '/api/logout';
+      }
+
+      function crewRegister(title, realnum, maxnum) {
+        $.ajax({
+          type: 'POST',
+          url: '/crew',
+          headers: { token_give: $.cookie('mytoken') },
+          data: { title_give: title, realnum_give: realnum, maxnum_give: maxnum },
+          success: function (response) {
+            if (response['result'] == 'success') {
+              alert(
+                '크루 등록 완료!'
+              );
+              showArticles();
+            } else {
+              alert('오류');
+            }
+          },
+        });
+      }
+    //   function checkPeople(title){
+    //     alert(title);
+    //   }
+      function checkPeople(title) {
+        $.ajax({
+          type: 'POST',
+          url: '/crew/check',
+          data: { title_give: title },
+          success: function (response) {
+            if (response['result'] == 'success') {
+                console.log(response['total']);
+                let totalCrew =''
+                for (let i=0; i < response['total'].length; i++){
+                    totalCrew = totalCrew + response['total'][i] + '\n'
+                }
+            alert(title+'\n'+totalCrew);
+
+
+            } else {
+              alert('오류');
+            }
+          },
+        });
+      }
+
+      $(document).ready(function () {
+        showArticles();
+      });
+
+      function openClose() {
+        if ($('#post-box').css('display') == 'block') {
+          $('#post-box').hide();
+          $('#btn-post-box').text('등록하기');
+        } else {
+          $('#post-box').show();
+          $('#btn-post-box').text('취소하기');
+        }
+      }
+
+      function postArticle() {
+        let title = $('#post-title').val();
+        let url = $('#post-url').val();
+        let maxnum = $('#post-maxnum').val();
+        let date = $('#post-date').val();
+        let time = $('#post-time').val();
+
+        if (title == '') {
+          alert('제목을 입력하세요!');
+        } else if (url == '') {
+          alert('URL을 입력하세요!');
+        } else if (maxnum == '') {
+          alert('모집 인원을 입력하세요!');
+        } else if (date == '') {
+          alert('날짜를 입력하세요!');
+        } else if (time == '') {
+          alert('시간을 입력하세요!');
+        } else {
+          $.ajax({
+            type: 'POST',
+            url: '/memo',
+            headers: { token_give: $.cookie('mytoken') },
+            data: {
+              title_give: title,
+              url_give: url,
+              maxnum_give: maxnum,
+              date_give: date,
+              time_give: time,
+              realnum: 1,
+            },
+            success: function (response) {
+              if (response['result'] == 'success') {
+                alert('등록 완료');
+                $('#post-title').val('');
+                $('#post-url').val('');
+                $('#post-maxnum').val('');
+                $('#post-date').val('');
+                $('#post-time').val('');
+                $('#post-box').hide();
+                $('#btn-post-box').text('등록하기');
+                showArticles();
+              } else {
+                alert(response['msg']);
+              }
+            },
+          });
+        }
+      }
+
+      function showArticles() {
+        $('#cards-box').html('');
+        $.ajax({
+          type: 'GET',
+          url: '/memo',
+          data: {},
+          success: function (response) {
+            let register = response['register'];
+            console.log(register);
+            for (let i = 0; i < register.length; i++) {
+              makeCard(
+                register[i]['title'],
+                register[i]['url'],
+                register[i]['maxnum'],
+                register[i]['date'],
+                register[i]['time'],
+                register[i]['sign'],
+                register[i]['address'],
+                register[i]['realnum'],
+                i
+              );
+            }
+          },
+        });
+      }
+      function makeCard(
+        title,
+        url,
+        maxnum,
+        date,
+        time,
+        sign,
+        address,
+        realnum,
+        num
+      ) {
+        console.log(maxnum > realnum);
+        if (maxnum > realnum) {
+          let tempHtml = `<div class="card">
+                          <div class="content" id="${num}-main">
+                          <div class="card-body">
+                          <h1><strong>${title}</strong></h1>
+                          <div class="wwrap">
+                          <div class="restaurant">
+                              <p>맛집 이름:</p>
+                              <a href="${url}" target="_blank" class="card-title">${sign}</a>
+                          </div>
+                          <div class="address">
+                              <p >주소 : </p>
+                              <p>${address}</p>
+                          </div>
+                          <div class="maxnum">
+                              <p >모집인원 : </p>
+                              <p>${realnum} / ${maxnum}</p>
+                          </div>
+                          <div class="date">
+                              <p >날짜 : </p>
+                              <p>${date}</p>
+                          </div>
+                          <div class="time">
+                              <p >시간 : </p>
+                              <p>${time}</p>
+                          </div>
+                          </div>
+                          <div class="button">
+                          <button onclick="crewRegister('${title}','${realnum}','${maxnum}')" class= "btn-success btn-sm">크루등록</button>
+                          <button onclick="checkPeople('${title}')" class= "btn-secondary btn-sm">인원 확인</button>
+
+                          </div>
+                      </div>
+                      </div>
+
+                      </div>`;
+
+          $('#cards-box').append(tempHtml);
+        } else {
+          let tempHtml = `<div class="card">
+                          <div class="content" id="${num}-main">
+                          <div class="card-body">
+                          <h1><strong>${title}</strong></h1>
+                          <div class="wwrap">
+                          <div class="restaurant">
+                              <p>맛집 이름:</p>
+                              <a href="${url}" target="_blank" class="card-title">${sign}</a>
+                          </div>
+                          <div class="address">
+                              <p >주소 : </p>
+                              <p>${address}</p>
+                          </div>
+                          <div class="maxnum">
+                              <p >모집인원 : </p>
+                              <p>${realnum} / ${maxnum}</p>
+                          </div>
+                          <div class="date">
+                              <p >날짜 : </p>
+                              <p>${date}</p>
+                          </div>
+                          <div class="time">
+                              <p >시간 : </p>
+                              <p>${time}</p>
+                          </div>
+                          </div>
+                          <button onclick="crewRegister('${title}','${realnum}','${maxnum}')" class= "btn-secondary btn-sm" disabled>모집완료</button>
+                          <button onclick="checkPeople('${title}')" class= "btn-secondary btn-sm">인원 확인</button>
+
+                      </div>
+                      </div>
+
+                      </div>`;
+
+          $('#cards-box').append(tempHtml);
+        }
+      }
+    </script>
+    <script type="text/javascript">
+      var today = new Date(); //오늘 날짜//내 컴퓨터 로컬을 기준으로 today에 Date 객체를 넣어줌
+      var date = new Date(); //today의 Date를 세어주는 역할
+      function prevCalendar() {
+        //이전 달
+        // 이전 달을 today에 값을 저장하고 달력에 today를 넣어줌
+        //today.getFullYear() 현재 년도//today.getMonth() 월  //today.getDate() 일
+        //getMonth()는 현재 달을 받아 오므로 이전달을 출력하려면 -1을 해줘야함
+        today = new Date(
+          today.getFullYear(),
+          today.getMonth() - 1,
+          today.getDate()
+        );
+        buildCalendar(); //달력 cell 만들어 출력
+      }
+
+      function nextCalendar() {
+        //다음 달
+        // 다음 달을 today에 값을 저장하고 달력에 today 넣어줌
+        //today.getFullYear() 현재 년도//today.getMonth() 월  //today.getDate() 일
+        //getMonth()는 현재 달을 받아 오므로 다음달을 출력하려면 +1을 해줘야함
+        today = new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          today.getDate()
+        );
+        buildCalendar(); //달력 cell 만들어 출력
+      }
+      function buildCalendar() {
+        //현재 달 달력 만들기
+        var doMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        //이번 달의 첫째 날,
+        //new를 쓰는 이유 : new를 쓰면 이번달의 로컬 월을 정확하게 받아온다.
+        //new를 쓰지 않았을때 이번달을 받아오려면 +1을 해줘야한다.
+        //왜냐면 getMonth()는 0~11을 반환하기 때문
+        var lastDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        //이번 달의 마지막 날
+        //new를 써주면 정확한 월을 가져옴, getMonth()+1을 해주면 다음달로 넘어가는데
+        //day를 1부터 시작하는게 아니라 0부터 시작하기 때문에
+        //대로 된 다음달 시작일(1일)은 못가져오고 1 전인 0, 즉 전달 마지막일 을 가져오게 된다
+        var tbCalendar = document.getElementById('calendar');
+        //날짜를 찍을 테이블 변수 만듬, 일 까지 다 찍힘
+        var tbCalendarYM = document.getElementById('tbCalendarYM');
+        //테이블에 정확한 날짜 찍는 변수
+        //innerHTML : js 언어를 HTML의 권장 표준 언어로 바꾼다
+        //new를 찍지 않아서 month는 +1을 더해줘야 한다.
+        tbCalendarYM.innerHTML =
+          today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월';
+
+        /*while은 이번달이 끝나면 다음달로 넘겨주는 역할*/
+        while (tbCalendar.rows.length > 2) {
+          //열을 지워줌
+          //기본 열 크기는 body 부분에서 2로 고정되어 있다.
+          tbCalendar.deleteRow(tbCalendar.rows.length - 1);
+          //테이블의 tr 갯수 만큼의 열 묶음은 -1칸 해줘야지
+          //30일 이후로 담을달에 순서대로 열이 계속 이어진다.
+        }
+        var row = null;
+        row = tbCalendar.insertRow();
+        //테이블에 새로운 열 삽입//즉, 초기화
+        var cnt = 0; // count, 셀의 갯수를 세어주는 역할
+        // 1일이 시작되는 칸을 맞추어 줌
+        for (i = 0; i < doMonth.getDay(); i++) {
+          /*이번달의 day만큼 돌림*/
+          cell = row.insertCell(); //열 한칸한칸 계속 만들어주는 역할
+          cnt = cnt + 1; //열의 갯수를 계속 다음으로 위치하게 해주는 역할
+        }
+        /*달력 출력*/
+        for (i = 1; i <= lastDate.getDate(); i++) {
+          //1일부터 마지막 일까지 돌림
+          cell = row.insertCell(); //열 한칸한칸 계속 만들어주는 역할
+          cell.innerHTML = i; //셀을 1부터 마지막 day까지 HTML 문법에 넣어줌
+          cnt = cnt + 1; //열의 갯수를 계속 다음으로 위치하게 해주는 역할
+          if (cnt % 7 == 1) {
+            /*일요일 계산*/
+            //1주일이 7일 이므로 일요일 구하기
+            //월화수목금토일을 7로 나눴을때 나머지가 1이면 cnt가 1번째에 위치함을 의미한다
+            cell.innerHTML = '<font color=#F79DC2>' + i;
+            //1번째의 cell에만 색칠
+          }
+          if (cnt % 7 == 0) {
+            /* 1주일이 7일 이므로 토요일 구하기*/
+            //월화수목금토일을 7로 나눴을때 나머지가 0이면 cnt가 7번째에 위치함을 의미한다
+            cell.innerHTML = '<font color=skyblue>' + i;
+            //7번째의 cell에만 색칠
+            row = calendar.insertRow();
+            //토요일 다음에 올 셀을 추가
+          }
+          /*오늘의 날짜에 노란색 칠하기*/
+          if (
+            today.getFullYear() == date.getFullYear() &&
+            today.getMonth() == date.getMonth() &&
+            i == date.getDate()
+          ) {
+            //달력에 있는 년,달과 내 컴퓨터의 로컬 년,달이 같고, 일이 오늘의 일과 같으면
+            cell.bgColor = '#FAF58C'; //셀의 배경색을 노랑으로
+          }
+        }
+      }
+    </script>
+  </head>
+  
+  <body>
+    <header>
+      <div class="logo-jungle">
+        <img style="width: 100px; margin: 10px" src="..\static\chick.png" />
+        <h1 style="margin: 25px 15px; color: white">맛집 크루 모집</h1>
+      </div>
+      <div class="logout">
+        <h2 class="user-name">
+          <strong> {{template_name}} 님 안녕하세요! </strong>
+        </h2>
+        <button
+          class="btn btn-danger btn"
+          style="height: 50px; margin: auto"
+          onclick="logout()"
+        >
+          로그아웃
+        </button>
+      </div>
+    </header>
+
+    <div style="display: flex; justify-content: space-evenly">
+      <table>
+        <tr>
+          <td>
+            <a href="{{add1}}" target="_blank">
+              <img
+                src="{{url1}}"
+                style="
+                  display: block;
+                  margin: 0 auto;
+                  width: 200px;
+                  height: 200px;
+                "
+              />
+            </a>
+            {{name1}}
+          </td>
+        </tr>
+      </table>
+
+      <div style="margin: 40px 0px 0px">
+        <table
+          id="calendar"
+          border="3"
+          align="center"
+          style="border-color: green"
+        >
+          <tr>
+            <td><label onclick="prevCalendar()"><</label></td>
+            <td align="center" id="tbCalendarYM" colspan="5">yyyy년 m월</td>
+            <td><label onclick="nextCalendar()">></label></td>
+          </tr>
+          <tr>
+            <td align="center" font color="#F79DC2">일</td>
+            <td align="center">월</td>
+            <td align="center">화</td>
+            <td align="center">수</td>
+            <td align="center">목</td>
+            <td align="center">금</td>
+            <td align="center" font color="skyblue">토</td>
+          </tr>
+        </table>
+      </div>
+      <table>
+        <tr>
+          <td>
+            <a href="{{add2}}" target="_blank">
+              <img
+                src="{{url2}}"
+                style="
+                  display: block;
+                  margin: 0 auto;
+                  width: 200px;
+                  height: 200px;
+                "
+              />
+            </a>
+            {{name2}}
+          </td>
+        </tr>
+      </table>
+    </div>
+    <script language="javascript" type="text/javascript">
+      buildCalendar();
+    </script>
+
+    <button
+      onclick="openClose()"
+      id="btn-post-box"
+      type="button"
+      class="btn btn-success"
+      style="margin: 20px auto; display: block"
+    >
+      등록하기
+    </button>
+
+    <div id="post-box" class="form-post" style="display: none">
+      <div>
+        <h1 style="text-align: center; display: inline-block">
+          <strong> 크루 모집 공고 올리기 </strong>
+        </h1>
+        <div class="form-group">
+          <label for="post-title">제목</label>
+          <input id="post-title" class="form-control" placeholder="" />
+        </div>
+        <div class="form-group">
+          <label for="post-url">맛집 URL (카카오맵)</label>
+          <input id="post-url" class="form-control" rows="2" />
+        </div>
+        <div class="form-group">
+          <label for="post-maxnum">모집 인원</label>
+          <input id="post-maxnum" class="form-control" rows="3" />
+        </div>
+        <div class="form-group">
+          <label for="post-date">날짜</label>
+          <input id="post-date" class="form-control" rows="4" />
+        </div>
+        <div class="form-group">
+          <label for="post-time">시간</label>
+          <input id="post-time" class="form-control" rows="5" />
+        </div>
+        <button
+          type="button"
+          class="btn btn-success"
+          style="float: right; margin: auto 10px auto"
+          onclick="postArticle()"
+        >
+          저장
+        </button>
+      </div>
+    </div>
+
+    <div id="cards-box" class="card-columns">
+      <div class="card">
+        <div class="card-body">
+          <p class="card-text">
+            기사의 요약 내용이 들어갑니다. 동해물과 백두산이 마르고 닳도록
+            하느님이 보우하사 우리나라만세 무궁화 삼천리 화려강산...
+          </p>
+          <p class="card-text comment">여기에 코멘트가 들어갑니다.</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
